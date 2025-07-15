@@ -1,0 +1,36 @@
+name: Build Linux Kernel
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libncurses-dev bison flex libssl-dev libelf-dev
+
+    - name: Configure kernel
+      run: |
+        make defconfig
+
+    - name: Build kernel
+      run: |
+        nproc
+        make -j$(nproc)
+
+    # 可选：上传编译产物
+    - name: Upload kernel image
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-image
+        path: arch/x86/boot/*
